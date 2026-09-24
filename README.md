@@ -1,5 +1,10 @@
 # NCKU-RTOS-2026 Virtual Power Plant (VPP) Dynamic Scheduling System
 
+![Python](https://img.shields.io/badge/language-Python-3776AB?logo=python&logoColor=white)
+![pytest](https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white)
+![Scheduling](https://img.shields.io/badge/scheduling-offline%20DFS%20%2B%20online%20admission-555)
+![License: MIT](https://img.shields.io/badge/license-MIT-yellow)
+
 ## 🚀 快速執行指南 (Quick Start & Execution Guide)
 
 本專案同時支援 **「自動批次分析 10 種情境」** 以及 **「單一檔案 Demo 測試」**，並且可以隨時在 Level 1 (基礎要求) 與 Level 2 (進階動態排程) 之間無縫切換。
