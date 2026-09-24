@@ -1,8 +1,8 @@
 """
-main.py — VPP Real-Time Scheduling 主程式
+scheduler.py — VPP Real-Time Scheduling 主程式
 
 Level 1 baseline  : LEVEL2_ENABLED = False
-Level 2 advanced  : LEVEL2_ENABLED = False
+Level 2 advanced  : LEVEL2_ENABLED = True
 """
 
 import os
