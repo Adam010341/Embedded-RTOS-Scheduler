@@ -5,9 +5,9 @@
 ![Scheduling](https://img.shields.io/badge/scheduling-offline%20DFS%20%2B%20online%20admission-555)
 ![License: MIT](https://img.shields.io/badge/license-MIT-yellow)
 
-[English](README.md) | **繁體中文**
+[English](README.md) | 繁體中文
 
-虛擬電廠的 72 小時排程器。週期任務以 Frame 為單位用 DFS 離線排程，sporadic 與 aperiodic 任務走線上准入控制，Level 2 另加入預測誤差、市場承諾售電與電池模型。可執行 10 種情境的批次分析或單一 Demo 檔，並可在 Level 1（基礎）與 Level 2（進階）之間切換。
+我們做了一個虛擬電廠的 72 小時排程器。週期任務以 Frame 為單位用 DFS 離線排程，sporadic 與 aperiodic 任務走線上准入控制，Level 2 另加入預測誤差、市場承諾售電與電池模型。可執行 10 種情境的批次分析或單一 Demo 檔，並可在 Level 1（基礎）與 Level 2（進階）之間切換。
 
 ## 快速執行指南
 
@@ -27,7 +27,7 @@ Level 1 直接使用綠電預測值與 Level 1 電池模型，不做市場承諾
 ### 批次模式與 Demo 模式
 若 `input/aperiodic_n_sporadic.json` 存在，`src/scheduler.py` 執行 Demo 模式，否則執行批次模式。repository 附有範例檔，所以剛 clone 後執行 `python src/scheduler.py` 會進入 Demo 模式。
 
-**批次模式**會模擬 `output/sporadic_aperiodic_task/` 下的 10 組 `scenario_*.json`。請先移走 Demo 檔：
+批次模式會模擬 `output/sporadic_aperiodic_task/` 下的 10 組 `scenario_*.json`。請先移走 Demo 檔：
 ```bash
 mv input/aperiodic_n_sporadic.json input/aperiodic_n_sporadic.json.bak
 python src/scheduler.py
@@ -38,7 +38,7 @@ python src/scheduler.py
 
 要回到 Demo 模式，把檔案移回來：`mv input/aperiodic_n_sporadic.json.bak input/aperiodic_n_sporadic.json`。
 
-**Demo 模式：**將突發任務檔放到 `input/aperiodic_n_sporadic.json`（取代範例檔），執行 `python src/scheduler.py`。批次情境會被跳過，結果直接覆蓋 `output/schedule_result.json`、`output/acceptance_test_log.json`、`output/evaluation_results.json`。repository 內這三個檔案是以附帶範例檔執行的結果。
+Demo 模式：將突發任務檔放到 `input/aperiodic_n_sporadic.json`（取代範例檔），執行 `python src/scheduler.py`。批次情境會被跳過，結果直接覆蓋 `output/schedule_result.json`、`output/acceptance_test_log.json`、`output/evaluation_results.json`。repository 內這三個檔案是以附帶範例檔執行的結果。
 
 ### 執行測試
 ```bash
@@ -83,11 +83,11 @@ Embedded-RTOS-Scheduler/
 
 `src/task_generator.py` 抽出 `N = 6–10` 個任務。repository 內的 `output/task_set.json`（種子 2026）為 `N = 6`、`DW ≈ 0.99`，72 小時內共 44 個 Job。
 
-- **不可中斷任務綁定 `e=2` 而非 `e=3`。**執行時間為 `[1]*(N-4) + [2, 2, 3, 3]`。兩個 `e=2` 的任務不可中斷；兩個 `e=3`（`d=3`）的任務可中斷。不可中斷的 `e=3, d=3` 任務沒有鬆弛，必須剛好占一段連續 3 小時，會造成排程碎片化並讓 DFS 需要更多回溯。
-- **短週期。**`(N-2)//2` 個任務使用 `p=6`，提供穩定的基底負載。生成器不以特定 DW 為目標；`validate()` 只接受 `0.7 ≤ DW ≤ 1.0`。
-- **混合週期。**前 `N-2` 個任務中其餘的共用一個從 `{11, 12}` 抽出的週期，最後兩個任務從 `{15, 18, 21, 24}` 抽出兩個不同週期。前 `N-2` 個任務的 `d` 從 `[6, p]` 抽取，以滿足 `f=3` 的 Frame 可視性 (`2f−gcd(f,p)≤d`)。
-- **Deadline 分層。**最後兩個任務 `d=3`（`=e`），滿足「至少 20% 的任務 `d=e`」；前段保留寬鬆 Deadline (≥6)，讓排程器有空間平移能量與調整機組升降載。
-- **固定種子與驗證。**`RANDOM_SEED=2026`。`validate()` 檢查 Frame 可視性、`0.7 ≤ DW ≤ 1.0`、72 小時內 Job 數大於 30、至少 3 種不同週期，以及不可中斷任務 `d ≥ e`。生成器只抽一次，`main()` 只有在驗證通過時才寫入 `output/task_set.json`。
+- 執行時間為 `[1]*(N-4) + [2, 2, 3, 3]`。兩個 `e=2` 的任務不可中斷；兩個 `e=3`（`d=3`）的任務可中斷。不可中斷的 `e=3, d=3` 任務沒有鬆弛，必須剛好占一段連續 3 小時，會造成排程碎片化並讓 DFS 需要更多回溯。
+- `(N-2)//2` 個任務使用 `p=6`，提供穩定的基底負載。生成器不以特定 DW 為目標；`validate()` 只接受 `0.7 ≤ DW ≤ 1.0`。
+- 前 `N-2` 個任務中其餘的共用一個從 `{11, 12}` 抽出的週期，最後兩個任務從 `{15, 18, 21, 24}` 抽出兩個不同週期。前 `N-2` 個任務的 `d` 從 `[6, p]` 抽取，以滿足 `f=3` 的 Frame 可視性 (`2f−gcd(f,p)≤d`)。
+- 最後兩個任務 `d=3`（`=e`），滿足「至少 20% 的任務 `d=e`」；前段保留寬鬆 Deadline (≥6)，讓排程器有空間平移能量與調整機組升降載。
+- `RANDOM_SEED=2026`。`validate()` 檢查 Frame 可視性、`0.7 ≤ DW ≤ 1.0`、72 小時內 Job 數大於 30、至少 3 種不同週期，以及不可中斷任務 `d ≥ e`。生成器只抽一次，`main()` 只有在驗證通過時才寫入 `output/task_set.json`。
 
 ## 核心排程引擎
 
@@ -105,8 +105,8 @@ Embedded-RTOS-Scheduler/
 
 ### 2. 線上准入控制
 `src/engine/acceptance_tester.py`，處理 sporadic 與 aperiodic 任務。
-- **Sporadic（硬限制）：**檢查 Deadline 前是否有足夠小時數（不可中斷任務需連續）其剩餘算力 ≥ 任務需求。有就預留，否則拒絕。
-- **Aperiodic（軟限制）：**抵達時若剩餘算力完全放不下就拒絕，否則放入等候佇列。系統每小時依序掃描佇列：放得下的任務執行（可中斷任務每次 1 小時，不可中斷任務一次排完整段），放不下的先跳過，讓後面的任務仍可執行（Backfilling，避免隊頭阻塞）。佇列中的任務等待超過 24 小時，或剩餘執行時間超過 72 小時內剩下的時數，就會被丟棄。
+- Sporadic（硬限制）：檢查 Deadline 前是否有足夠小時數（不可中斷任務需連續）其剩餘算力 ≥ 任務需求。有就預留，否則拒絕。
+- Aperiodic（軟限制）：抵達時若剩餘算力完全放不下就拒絕，否則放入等候佇列。系統每小時依序掃描佇列：放得下的任務執行（可中斷任務每次 1 小時，不可中斷任務一次排完整段），放不下的先跳過，讓後面的任務仍可執行（Backfilling，避免隊頭阻塞）。佇列中的任務等待超過 24 小時，或剩餘執行時間超過 72 小時內剩下的時數，就會被丟棄。
 
 ### 3. 線上即時分派與能量溯源
 `src/engine/main_scheduler.py`、`src/engine/power_tracer.py`。每小時：
@@ -117,7 +117,7 @@ Embedded-RTOS-Scheduler/
 
 ### 4. Level 2 進階動態重排程
 `src/advanced_scheduler.py`，僅在 `LEVEL2_ENABLED = True` 時啟動；參數位於 `src/scheduler.py` 的 `LEVEL2_CONFIG`。
-1. **綠電不確定性：**實際出力 = 預測值乘上 ±20% 內均勻抽樣的相對誤差（`forecast_error_ratio`，種子 `random_seed = 2026`），並限制在機組容量以內。
-2. **市場承諾：**系統每小時承諾售出固定電量（`5.0 × commitment_ratio = 4.0` MWh）。缺口依 `penalty_rate`（每 MWh）計罰；超出承諾的售電以 `(realtime_price_multiplier − 1) × 電價` 取得額外收益。
-3. **電池模型：**考慮充放電效率、自放電與 SOC 相依的放電上限。每放電 1 MWh 產生老化成本，計入 Level 2 調整後目標值。多餘電力透過 `<電池>_chg` 虛擬任務為電池充電。
-4. **救援：**實際綠電低於預測時，系統記錄電池放電與火力升載餘裕可補足多少缺口（僅為估算）；接著由上述分派流程補足淨負載。若估算餘裕不足，該小時正在執行的 aperiodic job（ID 以 `a_` 開頭）會被延後並踢回佇列，優先保證週期性與 sporadic 任務的供電。
+1. 實際出力 = 預測值乘上 ±20% 內均勻抽樣的相對誤差（`forecast_error_ratio`，種子 `random_seed = 2026`），並限制在機組容量以內。
+2. 系統每小時承諾售出固定電量（`5.0 × commitment_ratio = 4.0` MWh）。缺口依 `penalty_rate`（每 MWh）計罰；超出承諾的售電以 `(realtime_price_multiplier − 1) × 電價` 取得額外收益。
+3. 電池模型有充放電效率、自放電與 SOC 相依的放電上限。每放電 1 MWh 產生老化成本，計入 Level 2 調整後目標值。多餘電力透過 `<電池>_chg` 虛擬任務為電池充電。
+4. 實際綠電低於預測時，系統記錄電池放電與火力升載餘裕可補足多少缺口（僅為估算）；接著由上述分派流程補足淨負載。若估算餘裕不足，該小時正在執行的 aperiodic job（ID 以 `a_` 開頭）會被延後並踢回佇列，優先保證週期性與 sporadic 任務的供電。

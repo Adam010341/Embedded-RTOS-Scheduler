@@ -5,9 +5,9 @@
 ![Scheduling](https://img.shields.io/badge/scheduling-offline%20DFS%20%2B%20online%20admission-555)
 ![License: MIT](https://img.shields.io/badge/license-MIT-yellow)
 
-**English** | [繁體中文](README.zh-TW.md)
+English | [繁體中文](README.zh-TW.md)
 
-A 72-hour scheduler for a virtual power plant. Periodic tasks are planned offline with a frame-based DFS, sporadic and aperiodic tasks go through online admission control, and Level 2 adds forecast error, a market commitment and a battery model. It runs a 10-scenario batch analysis or a single Demo file, in Level 1 (baseline) or Level 2 (advanced) mode.
+We built a 72-hour scheduler for a virtual power plant. Periodic tasks are planned offline with a frame-based DFS. Sporadic and aperiodic tasks go through online admission control. Level 2 adds forecast error, a market commitment and a battery model. It can run a 10-scenario batch or a single Demo file, in Level 1 (baseline) or Level 2 (advanced) mode.
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ Level 1 uses the renewable forecast as-is and the Level 1 battery model, with no
 ### Batch vs. Demo mode
 If `input/aperiodic_n_sporadic.json` exists, `src/scheduler.py` runs Demo mode; otherwise it runs Batch mode. The repository ships a sample file, so `python src/scheduler.py` on a fresh clone runs Demo mode.
 
-**Batch mode** simulates the 10 `scenario_*.json` files in `output/sporadic_aperiodic_task/`. Move the Demo file away first:
+Batch mode simulates the 10 `scenario_*.json` files in `output/sporadic_aperiodic_task/`. Move the Demo file away first:
 ```bash
 mv input/aperiodic_n_sporadic.json input/aperiodic_n_sporadic.json.bak
 python src/scheduler.py
@@ -38,7 +38,7 @@ python src/scheduler.py
 
 Move the file back (`mv input/aperiodic_n_sporadic.json.bak input/aperiodic_n_sporadic.json`) to return to Demo mode.
 
-**Demo mode:** put your burst-task file at `input/aperiodic_n_sporadic.json` (replacing the sample) and run `python src/scheduler.py`. The batch scenarios are skipped and the results overwrite `output/schedule_result.json`, `output/acceptance_test_log.json` and `output/evaluation_results.json`. The committed copies of these three files come from a run on the bundled sample.
+Demo mode: put your burst-task file at `input/aperiodic_n_sporadic.json` (replacing the sample) and run `python src/scheduler.py`. The batch scenarios are skipped and the results overwrite `output/schedule_result.json`, `output/acceptance_test_log.json` and `output/evaluation_results.json`. The committed copies of these three files come from a run on the bundled sample.
 
 ### Tests
 ```bash
@@ -83,15 +83,15 @@ Embedded-RTOS-Scheduler/
 
 `src/task_generator.py` draws `N = 6–10` tasks. The committed `output/task_set.json` (seed 2026) has `N = 6`, `DW ≈ 0.99` and 44 jobs over 72 hours.
 
-- **Non-preemptive tasks use `e=2`, not `e=3`.** Execution times are `[1]*(N-4) + [2, 2, 3, 3]`. The two `e=2` tasks are non-preemptive; the two `e=3` tasks (`d=3`) stay preemptive. A non-preemptive `e=3, d=3` task has zero slack and needs one exact 3-hour block, which fragments the schedule and forces more DFS backtracking.
-- **Short periods.** `(N-2)//2` tasks use `p=6` for a stable base load. The generator does not target a specific DW; `validate()` accepts only `0.7 ≤ DW ≤ 1.0`.
-- **Mixed periods.** The remaining first `N-2` tasks share one period from `{11, 12}`; the last two take two distinct periods from `{15, 18, 21, 24}`. The first `N-2` tasks draw `d` from `[6, p]`, which satisfies Frame visibility for `f=3` (`2f−gcd(f,p)≤d`).
-- **Tiered deadlines.** The last two tasks have `d=3` (`=e`), meeting the requirement that at least 20% of tasks have `d=e`. Earlier tasks keep relaxed deadlines (≥6), leaving room to shift energy and ramp generators.
-- **Fixed seed and validation.** `RANDOM_SEED=2026`. `validate()` checks Frame visibility, `0.7 ≤ DW ≤ 1.0`, more than 30 jobs in 72 hours, at least 3 distinct periods, and `d ≥ e` for non-preemptive tasks. The generator draws once; `main()` writes `output/task_set.json` only if validation passes.
+- Execution times are `[1]*(N-4) + [2, 2, 3, 3]`. Only the two `e=2` tasks are non-preemptive; the two `e=3` tasks (`d=3`) stay preemptive. A non-preemptive `e=3, d=3` task has zero slack and needs one exact 3-hour block, which fragments the schedule and forces more DFS backtracking.
+- `(N-2)//2` tasks use `p=6`, which gives a steady base load. The generator does not target a specific DW; `validate()` accepts only `0.7 ≤ DW ≤ 1.0`.
+- The remaining first `N-2` tasks share one period from `{11, 12}`; the last two take two distinct periods from `{15, 18, 21, 24}`. The first `N-2` tasks draw `d` from `[6, p]`, which satisfies Frame visibility for `f=3` (`2f−gcd(f,p)≤d`).
+- The last two tasks have `d=3` (`=e`), meeting the requirement that at least 20% of tasks have `d=e`. Earlier tasks keep relaxed deadlines (≥6), leaving room to shift energy and ramp generators.
+- `RANDOM_SEED=2026`. `validate()` checks Frame visibility, `0.7 ≤ DW ≤ 1.0`, more than 30 jobs in 72 hours, at least 3 distinct periods, and `d ≥ e` for non-preemptive tasks. The generator draws once; `main()` writes `output/task_set.json` only if validation passes.
 
 ## Scheduling Engine
 
-Two tiers: an offline plan for periodic tasks, then online admission and dispatch for everything else.
+Periodic tasks get an offline plan. Everything else goes through online admission and dispatch.
 
 ### 1. Offline pre-scheduling
 `src/engine/offline_planner.py`, for periodic tasks.
@@ -105,8 +105,8 @@ Output: a 72-hour base schedule and the hourly slack capacity (remaining thermal
 
 ### 2. Online admission control
 `src/engine/acceptance_tester.py`, for sporadic and aperiodic tasks.
-- **Sporadic (hard):** check whether enough hours before the deadline (contiguous for non-preemptive tasks) have slack ≥ the task's demand. If so, reserve them; otherwise reject.
-- **Aperiodic (soft):** reject on arrival if the task fits nowhere in the remaining slack; otherwise queue it. Each hour the queue is scanned in order: tasks that fit run (preemptive one hour at a time, non-preemptive as a whole block), and tasks that do not fit are skipped so later ones can run (backfilling avoids head-of-line blocking). A queued task is dropped after waiting more than 24 hours, or when its remaining execution time exceeds the hours left in the 72-hour horizon.
+- Sporadic tasks (hard deadline): check whether enough hours before the deadline (contiguous for non-preemptive tasks) have slack ≥ the task's demand. If so, reserve them; otherwise reject.
+- Aperiodic tasks (soft): reject on arrival if the task fits nowhere in the remaining slack; otherwise queue it. Each hour the queue is scanned in order: tasks that fit run (preemptive one hour at a time, non-preemptive as a whole block), and tasks that do not fit are skipped so later ones can run (backfilling avoids head-of-line blocking). A queued task is dropped after waiting more than 24 hours, or when its remaining execution time exceeds the hours left in the 72-hour horizon.
 
 ### 3. Real-time dispatch and tracing
 `src/engine/main_scheduler.py`, `src/engine/power_tracer.py`. Each hour:
@@ -117,7 +117,7 @@ Output: a 72-hour base schedule and the hourly slack capacity (remaining thermal
 
 ### 4. Level 2 dynamic rescheduling
 `src/advanced_scheduler.py`, active only when `LEVEL2_ENABLED = True`; parameters are in `LEVEL2_CONFIG` in `src/scheduler.py`.
-1. **Renewable uncertainty:** actual output is the forecast scaled by a relative error drawn uniformly from ±20% (`forecast_error_ratio`, seed `random_seed = 2026`), clipped to unit capacity.
-2. **Market commitment:** the system commits to sell a fixed amount each hour (`5.0 × commitment_ratio = 4.0` MWh). A shortfall is penalized at `penalty_rate` per MWh; sales above the commitment earn `(realtime_price_multiplier − 1) × price`.
-3. **Battery model:** charge/discharge efficiencies, self-discharge and an SOC-dependent discharge limit. Each discharged MWh adds a degradation cost to the Level 2 adjusted objective. Surplus supply charges the batteries through a `<battery>_chg` pseudo-job.
-4. **Rescue:** when actual renewable output falls below the forecast, the system logs how much of the gap battery discharge and thermal ramp-up headroom could cover (estimates only); dispatch then covers the net load as in step 3 above. If the estimated headroom is not enough, aperiodic jobs running that hour (IDs starting with `a_`) are deferred back to the queue so periodic and sporadic jobs keep their power.
+1. Actual output is the forecast scaled by a relative error drawn uniformly from ±20% (`forecast_error_ratio`, seed `random_seed = 2026`), clipped to unit capacity.
+2. The system commits to sell a fixed amount each hour (`5.0 × commitment_ratio = 4.0` MWh). A shortfall is penalized at `penalty_rate` per MWh; sales above the commitment earn `(realtime_price_multiplier − 1) × price`.
+3. The battery model has charge/discharge efficiencies, self-discharge and an SOC-dependent discharge limit. Each discharged MWh adds a degradation cost to the Level 2 adjusted objective. Surplus supply charges the batteries through a `<battery>_chg` pseudo-job.
+4. When actual renewable output falls below the forecast, the system logs how much of the gap battery discharge and thermal ramp-up headroom could cover (estimates only); dispatch then covers the net load as in step 3 above. If the estimated headroom is not enough, aperiodic jobs running that hour (IDs starting with `a_`) are deferred back to the queue so periodic and sporadic jobs keep their power.
